@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'meta' => [
+    'page_id' => env('META_PAGE_ID'),
+    'page_access_token' => env('META_PAGE_ACCESS_TOKEN'),
+    'verify_token' => env('META_VERIFY_TOKEN'),
+    'graph_version' => env('META_GRAPH_VERSION', 'v26.0'),
+    ],
+
 ];

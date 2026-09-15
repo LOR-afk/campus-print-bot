@@ -1,5 +1,5 @@
 @extends('layouts.admin')
 
 @section('content')
-    <livewire:admin-dashboard />
+    <livewire:printer-manager />
 @endsection
