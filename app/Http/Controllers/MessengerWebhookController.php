@@ -29,40 +29,57 @@ class MessengerWebhookController extends Controller
         return response('Forbidden', 403);
     }
 
-    public function receive(Request $request)
-    {
-        $payload = $request->all();
+public function receive(Request $request)
+{
+    $payload = $request->all();
 
-        Log::info('Messenger webhook', $payload);
+    Log::info('Messenger webhook', [
+        'payload' => $payload,
+    ]);
 
-        foreach ($payload['entry'] ?? [] as $entry) {
-            foreach ($entry['messaging'] ?? [] as $event) {
-                $senderId = $event['sender']['id'] ?? null;
+    foreach ($payload['entry'] ?? [] as $entry) {
+        Log::info('Messenger entry', [
+            'entry' => $entry,
+        ]);
 
-                if (!$senderId) {
-                    continue;
-                }
+        foreach ($entry['messaging'] ?? [] as $event) {
+            Log::info('Messenger event', [
+                'event' => $event,
+            ]);
 
-                if (isset($event['postback']['payload'])) {
-                    $this->handlePostback(
-                        $senderId,
-                        $event['postback']['payload']
-                    );
+            $senderId = $event['sender']['id'] ?? null;
 
-                    continue;
-                }
+            Log::info('Messenger sender', [
+                'sender_id' => $senderId,
+                'has_text' => isset($event['message']['text']),
+                'text' => $event['message']['text'] ?? null,
+                'has_postback' => isset($event['postback']['payload']),
+            ]);
 
-                if (isset($event['message']['text'])) {
-                    $this->handleMessage(
-                        $senderId,
-                        $event['message']['text']
-                    );
-                }
+            if (!$senderId) {
+                continue;
+            }
+
+            if (isset($event['postback']['payload'])) {
+                $this->handlePostback(
+                    $senderId,
+                    $event['postback']['payload']
+                );
+
+                continue;
+            }
+
+            if (isset($event['message']['text'])) {
+                $this->handleMessage(
+                    $senderId,
+                    $event['message']['text']
+                );
             }
         }
-
-        return response('EVENT_RECEIVED', 200);
     }
+
+    return response('EVENT_RECEIVED', 200);
+}
 
     private function handleMessage(string $senderId, string $text): void
     {
